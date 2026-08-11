@@ -34,7 +34,7 @@
             border: 1px solid var(--card-border);
             border-radius: 12px;
             padding: 35px 40px;
-            max-width: 900px; /* Breiter für Mac-Bildschirme */
+            max-width: 900px;
             width: 100%;
             box-shadow: 0 10px 25px rgba(0,0,0,0.5);
         }
@@ -60,7 +60,7 @@
         .form-group { display: flex; flex-direction: column; gap: 6px; margin-bottom: 15px; }
         label { font-size: 0.85rem; color: var(--text-muted); font-weight: 600; }
         
-        input {
+        input, select {
             background: #0b1329;
             border: 1px solid var(--card-border);
             color: #fff;
@@ -71,7 +71,7 @@
             width: 100%;
         }
 
-        input:focus { border-color: var(--accent); }
+        input:focus, select:focus { border-color: var(--accent); }
 
         button.submit-btn {
             width: 100%;
@@ -109,8 +109,24 @@
 
     <form id="directForm">
         <div class="form-group">
-            <label>Spieler Name</label>
-            <input type="text" id="spieler" placeholder="Name auswählen oder eingeben" list="rosterList" required>
+            <label>Spieler Auswählen</label>
+            <select id="spielerSelect" required>
+                <option value="" disabled selected>-- Bitte Spieler auswählen --</option>
+                <option value="Jürgen Schützendorf">Jürgen Schützendorf</option>
+                <option value="Niklas Weichert">Niklas Weichert</option>
+                <option value="Ludger Schledorn">Ludger Schledorn</option>
+                <option value="Michael Müller">Michael Müller</option>
+                <option value="Markus Ginsel">Markus Ginsel</option>
+                <option value="Dominik Helmke">Dominik Helmke</option>
+                <option value="Lars Neutag">Lars Neutag</option>
+                <option value="Andreas Denner">Andreas Denner</option>
+                <option value="Markus Lenz">Markus Lenz</option>
+                <option value="Thomas Kliver">Thomas Kliver</option>
+                <option value="Florian Hartwich">Florian Hartwich</option>
+                <option value="Wolfram Senger">Wolfram Senger</option>
+                <option value="Tim Siegel">Tim Siegel</option>
+                <option value="Brian Müller">Brian Müller</option>
+            </select>
         </div>
 
         <div class="section-title">Leistungsdaten</div>
@@ -159,35 +175,19 @@
     </form>
 </div>
 
-<datalist id="rosterList">
-    <option value="Jürgen Schützendorf">
-    <option value="Niklas Weichert">
-    <option value="Ludger Schledorn">
-    <option value="Michael Müller">
-    <option value="Markus Ginsel">
-    <option value="Dominik Helmke">
-    <option value="Lars Neutag">
-    <option value="Andreas Denner">
-    <option value="Markus Lenz">
-    <option value="Thomas Kliver">
-    <option value="Florian Hartwich">
-    <option value="Wolfram Senger">
-    <option value="Tim Siegel">
-    <option value="Brian Müller">
-</datalist>
-
 <script>
     const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwbE4bDdAZTc5PWi--zsfaCBkD3OdQpucGnKJtEpie8vbvR94S1XrEbxZ42diUrHFEpwg/exec";
 
     document.getElementById('directForm').addEventListener('submit', async function(e) {
         e.preventDefault();
         
-        const status = document.getElementById('statusMsg');
-        const submitBtn = document.getElementById('submitBtn');
-        submitBtn.disabled = true;
-        submitBtn.textContent = "⏳ Speichere in Google Sheet...";
-        status.style.display = "none";
+        const spieler = document.getElementById('spielerSelect').value;
+        const avg = document.getElementById('avg').value;
+        const spiele = document.getElementById('spiele').value;
+        const gewonnen = document.getElementById('gewonnen').value;
+        const verloren = document.getElementById('verloren').value;
 
+        // Highlights zusammensetzen
         let hList = [];
         const c180 = document.getElementById('count180').value.trim();
         const hf = document.getElementById('highFinish').value.trim();
@@ -199,15 +199,33 @@
         if (sl) hList.push(`SL: ${sl} Darts`);
         if (extra) hList.push(extra);
 
-        const combinedHighlights = hList.join(", ");
+        const combinedHighlights = hList.join(", ") || "Keine";
+
+        // Sicherheitsabfrage (Sicherung vor dem Speichern)
+        const confirmMessage = 
+            `Möchtest du folgende Daten wirklich speichern?\n\n` +
+            `👤 Spieler: ${spieler}\n` +
+            `📊 Avg: ${avg}\n` +
+            `🎯 Spiele: ${spiele} (G: ${gewonnen} / V: ${verloren})\n` +
+            `🔥 Highlights: ${combinedHighlights}`;
+
+        if (!confirm(confirmMessage)) {
+            return; // Abbrechen, falls der Nutzer im Pop-up auf "Abbrechen" klickt
+        }
+
+        const status = document.getElementById('statusMsg');
+        const submitBtn = document.getElementById('submitBtn');
+        submitBtn.disabled = true;
+        submitBtn.textContent = "⏳ Speichere in Google Sheet...";
+        status.style.display = "none";
 
         const payload = {
-            spieler: document.getElementById('spieler').value.trim(),
-            avg: document.getElementById('avg').value,
-            spiele: document.getElementById('spiele').value,
-            gewonnen: document.getElementById('gewonnen').value,
-            verloren: document.getElementById('verloren').value,
-            highlights: combinedHighlights
+            spieler: spieler,
+            avg: avg,
+            spiele: spiele,
+            gewonnen: gewonnen,
+            verloren: verloren,
+            highlights: combinedHighlights === "Keine" ? "" : combinedHighlights
         };
 
         try {
