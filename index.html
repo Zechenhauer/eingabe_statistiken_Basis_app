@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TV Kapellen - Manuelle Statistik-Eingabe</title>
+    <style>
+        :root {
+            --bg-color: #0b1329;
+            --card-bg: #162238;
+            --card-border: #23334d;
+            --accent: #3b82f6;
+            --accent-gold: #eab308;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --success: #22c55e;
+            --danger: #ef4444;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .form-container {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
+            padding: 25px;
+            max-width: 550px;
+            width: 100%;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+        }
+
+        h2 { color: var(--accent-gold); margin-top: 0; text-align: center; }
+        p.sub { color: var(--text-muted); text-align: center; font-size: 0.85rem; margin-bottom: 20px; }
+
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+        .form-group { display: flex; flex-direction: column; gap: 5px; margin-bottom: 12px; }
+        label { font-size: 0.8rem; color: var(--text-muted); font-weight: 600; }
+        
+        input {
+            background: #0b1329;
+            border: 1px solid var(--card-border);
+            color: #fff;
+            padding: 10px;
+            border-radius: 6px;
+            font-size: 0.95rem;
+            outline: none;
+        }
+
+        input:focus { border-color: var(--accent); }
+
+        button.submit-btn {
+            width: 100%;
+            padding: 14px;
+            background: var(--success);
+            border: none;
+            border-radius: 8px;
+            color: #fff;
+            font-weight: bold;
+            font-size: 1rem;
+            cursor: pointer;
+            margin-top: 15px;
+            transition: opacity 0.2s;
+        }
+
+        button.submit-btn:hover { opacity: 0.9; }
+
+        .status-msg {
+            text-align: center;
+            font-size: 0.85rem;
+            margin-top: 12px;
+            display: none;
+            padding: 8px;
+            border-radius: 6px;
+        }
+        .status-success { background: rgba(34, 197, 94, 0.2); color: var(--success); }
+        .status-error { background: rgba(239, 68, 68, 0.2); color: var(--danger); }
+
+        @media (max-width: 500px) {
+            .grid-2 { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="form-container">
+    <h2>🎯 TV KAPELLEN 1919 e.V.</h2>
+    <p class="sub">Manuelle Werte-Eingabe (Statistiken)</p>
+
+    <form id="directForm">
+        <div class="form-group">
+            <label>Spieler Name</label>
+            <input type="text" id="spieler" placeholder="Name auswählen oder eingeben" list="rosterList" required>
+        </div>
+
+        <div class="grid-2">
+            <div class="form-group">
+                <label>Avg (Punkteschnitt)</label>
+                <input type="number" step="0.01" id="avg" placeholder="z.B. 54.20" required>
+            </div>
+            <div class="form-group">
+                <label>Spiele Gesamt</label>
+                <input type="number" id="spiele" placeholder="z.B. 10" required>
+            </div>
+        </div>
+
+        <div class="grid-2">
+            <div class="form-group">
+                <label>Gewonnen</label>
+                <input type="number" id="gewonnen" placeholder="z.B. 7" required>
+            </div>
+            <div class="form-group">
+                <label>Verloren</label>
+                <input type="number" id="verloren" placeholder="z.B. 3" required>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>Highlights</label>
+            <input type="text" id="highlights" placeholder="z.B. 180er: 2, HF: 110">
+        </div>
+
+        <button type="submit" class="submit-btn" id="submitBtn">💾 Werte Speichern</button>
+        <div id="statusMsg" class="status-msg"></div>
+    </form>
+</div>
+
+<datalist id="rosterList">
+    <option value="Jürgen Schützendorf">
+    <option value="Niklas Weichert">
+    <option value="Ludger Schledorn">
+    <option value="Michael Müller">
+    <option value="Markus Ginsel">
+    <option value="Dominik Helmke">
+    <option value="Lars Neutag">
+    <option value="Andreas Denner">
+    <option value="Markus Lenz">
+    <option value="Thomas Kliver">
+    <option value="Florian Hartwich">
+    <option value="Wolfram Senger">
+    <option value="Tim Siegel">
+    <option value="Brian Müller">
+</datalist>
+
+<script>
+    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwbE4bDdAZTc5PWi--zsfaCBkD3OdQpucGnKJtEpie8vbvR94S1XrEbxZ42diUrHFEpwg/exec";
+
+    document.getElementById('directForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const status = document.getElementById('statusMsg');
+        const submitBtn = document.getElementById('submitBtn');
+        submitBtn.disabled = true;
+        submitBtn.textContent = "⏳ Speichere in Google Sheet...";
+        status.style.display = "none";
+
+        const payload = {
+            spieler: document.getElementById('spieler').value.trim(),
+            avg: document.getElementById('avg').value,
+            spiele: document.getElementById('spiele').value,
+            gewonnen: document.getElementById('gewonnen').value,
+            verloren: document.getElementById('verloren').value,
+            highlights: document.getElementById('highlights').value.trim()
+        };
+
+        try {
+            await fetch(WEB_APP_URL, {
+                method: "POST",
+                mode: "no-cors",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload)
+            });
+
+            status.className = "status-msg status-success";
+            status.textContent = "✓ Daten wurden erfolgreich im Tabellenblatt 'Statistiken' aktualisiert!";
+            status.style.display = "block";
+
+        } catch (err) {
+            status.className = "status-msg status-error";
+            status.textContent = "Fehler beim Speichern: " + err.toString();
+            status.style.display = "block";
+        } finally {
+            submitBtn.disabled = false;
+            submitBtn.textContent = "💾 Werte Speichern";
+        }
+    });
+</script>
+</body>
+</html>
