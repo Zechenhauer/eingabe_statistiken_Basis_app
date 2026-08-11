@@ -24,7 +24,7 @@
             background-color: var(--bg-color);
             color: var(--text-main);
             margin: 0;
-            padding: 20px;
+            padding: 40px 20px;
             display: flex;
             justify-content: center;
         }
@@ -33,14 +33,14 @@
             background: var(--card-bg);
             border: 1px solid var(--card-border);
             border-radius: 12px;
-            padding: 25px;
-            max-width: 580px;
+            padding: 35px 40px;
+            max-width: 900px; /* Breiter für Mac-Bildschirme */
             width: 100%;
             box-shadow: 0 10px 25px rgba(0,0,0,0.5);
         }
 
-        h2 { color: var(--accent-gold); margin-top: 0; text-align: center; }
-        p.sub { color: var(--text-muted); text-align: center; font-size: 0.85rem; margin-bottom: 20px; }
+        h2 { color: var(--accent-gold); margin-top: 0; text-align: center; font-size: 1.6rem; }
+        p.sub { color: var(--text-muted); text-align: center; font-size: 0.9rem; margin-bottom: 25px; }
 
         .section-title {
             font-size: 0.85rem;
@@ -49,39 +49,41 @@
             text-transform: uppercase;
             letter-spacing: 0.5px;
             border-bottom: 1px dashed var(--card-border);
-            padding-bottom: 4px;
-            margin: 20px 0 12px 0;
+            padding-bottom: 6px;
+            margin: 25px 0 15px 0;
         }
 
-        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-        .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+        .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; }
 
-        .form-group { display: flex; flex-direction: column; gap: 5px; margin-bottom: 12px; }
-        label { font-size: 0.8rem; color: var(--text-muted); font-weight: 600; }
+        .form-group { display: flex; flex-direction: column; gap: 6px; margin-bottom: 15px; }
+        label { font-size: 0.85rem; color: var(--text-muted); font-weight: 600; }
         
         input {
             background: #0b1329;
             border: 1px solid var(--card-border);
             color: #fff;
-            padding: 10px;
+            padding: 12px;
             border-radius: 6px;
             font-size: 0.95rem;
             outline: none;
+            width: 100%;
         }
 
         input:focus { border-color: var(--accent); }
 
         button.submit-btn {
             width: 100%;
-            padding: 14px;
+            padding: 16px;
             background: var(--success);
             border: none;
             border-radius: 8px;
             color: #fff;
             font-weight: bold;
-            font-size: 1rem;
+            font-size: 1.05rem;
             cursor: pointer;
-            margin-top: 20px;
+            margin-top: 25px;
             transition: opacity 0.2s;
         }
 
@@ -89,18 +91,14 @@
 
         .status-msg {
             text-align: center;
-            font-size: 0.85rem;
-            margin-top: 12px;
+            font-size: 0.9rem;
+            margin-top: 15px;
             display: none;
-            padding: 8px;
+            padding: 10px;
             border-radius: 6px;
         }
         .status-success { background: rgba(34, 197, 94, 0.2); color: var(--success); }
         .status-error { background: rgba(239, 68, 68, 0.2); color: var(--danger); }
-
-        @media (max-width: 550px) {
-            .grid-2, .grid-3 { grid-template-columns: 1fr; }
-        }
     </style>
 </head>
 <body>
@@ -116,7 +114,7 @@
         </div>
 
         <div class="section-title">Leistungsdaten</div>
-        <div class="grid-2">
+        <div class="grid-4">
             <div class="form-group">
                 <label>Avg (Punkteschnitt)</label>
                 <input type="number" step="0.01" id="avg" placeholder="z.B. 54.20" required>
@@ -125,9 +123,6 @@
                 <label>Spiele Gesamt</label>
                 <input type="number" id="spiele" placeholder="z.B. 10" required>
             </div>
-        </div>
-
-        <div class="grid-2">
             <div class="form-group">
                 <label>Gewonnen</label>
                 <input type="number" id="gewonnen" placeholder="z.B. 7" required>
@@ -193,7 +188,6 @@
         submitBtn.textContent = "⏳ Speichere in Google Sheet...";
         status.style.display = "none";
 
-        // Einzelne Highlights zu einem zusammengesetzten Text für Spalte G formen
         let hList = [];
         const c180 = document.getElementById('count180').value.trim();
         const hf = document.getElementById('highFinish').value.trim();
