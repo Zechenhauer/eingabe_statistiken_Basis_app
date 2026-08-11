@@ -34,7 +34,7 @@
             border: 1px solid var(--card-border);
             border-radius: 12px;
             padding: 25px;
-            max-width: 550px;
+            max-width: 580px;
             width: 100%;
             box-shadow: 0 10px 25px rgba(0,0,0,0.5);
         }
@@ -42,7 +42,19 @@
         h2 { color: var(--accent-gold); margin-top: 0; text-align: center; }
         p.sub { color: var(--text-muted); text-align: center; font-size: 0.85rem; margin-bottom: 20px; }
 
+        .section-title {
+            font-size: 0.85rem;
+            font-weight: 800;
+            color: var(--accent);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 1px dashed var(--card-border);
+            padding-bottom: 4px;
+            margin: 20px 0 12px 0;
+        }
+
         .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
 
         .form-group { display: flex; flex-direction: column; gap: 5px; margin-bottom: 12px; }
         label { font-size: 0.8rem; color: var(--text-muted); font-weight: 600; }
@@ -69,7 +81,7 @@
             font-weight: bold;
             font-size: 1rem;
             cursor: pointer;
-            margin-top: 15px;
+            margin-top: 20px;
             transition: opacity 0.2s;
         }
 
@@ -86,8 +98,8 @@
         .status-success { background: rgba(34, 197, 94, 0.2); color: var(--success); }
         .status-error { background: rgba(239, 68, 68, 0.2); color: var(--danger); }
 
-        @media (max-width: 500px) {
-            .grid-2 { grid-template-columns: 1fr; }
+        @media (max-width: 550px) {
+            .grid-2, .grid-3 { grid-template-columns: 1fr; }
         }
     </style>
 </head>
@@ -103,6 +115,7 @@
             <input type="text" id="spieler" placeholder="Name auswählen oder eingeben" list="rosterList" required>
         </div>
 
+        <div class="section-title">Leistungsdaten</div>
         <div class="grid-2">
             <div class="form-group">
                 <label>Avg (Punkteschnitt)</label>
@@ -125,9 +138,25 @@
             </div>
         </div>
 
+        <div class="section-title">Highlights</div>
+        <div class="grid-3">
+            <div class="form-group">
+                <label>180er (Anzahl)</label>
+                <input type="number" id="count180" placeholder="z.B. 2">
+            </div>
+            <div class="form-group">
+                <label>High Finish (Höhe)</label>
+                <input type="number" id="highFinish" placeholder="z.B. 110">
+            </div>
+            <div class="form-group">
+                <label>Short Leg (Darts)</label>
+                <input type="number" id="shortLeg" placeholder="z.B. 15">
+            </div>
+        </div>
+
         <div class="form-group">
-            <label>Highlights</label>
-            <input type="text" id="highlights" placeholder="z.B. 180er: 2, HF: 110">
+            <label>Sonstige Highlights / Anmerkungen (optional)</label>
+            <input type="text" id="extraHighlights" placeholder="Zusätzliche Infos...">
         </div>
 
         <button type="submit" class="submit-btn" id="submitBtn">💾 Werte Speichern</button>
@@ -164,13 +193,27 @@
         submitBtn.textContent = "⏳ Speichere in Google Sheet...";
         status.style.display = "none";
 
+        // Einzelne Highlights zu einem zusammengesetzten Text für Spalte G formen
+        let hList = [];
+        const c180 = document.getElementById('count180').value.trim();
+        const hf = document.getElementById('highFinish').value.trim();
+        const sl = document.getElementById('shortLeg').value.trim();
+        const extra = document.getElementById('extraHighlights').value.trim();
+
+        if (c180) hList.push(`180er: ${c180}`);
+        if (hf) hList.push(`HF: ${hf}`);
+        if (sl) hList.push(`SL: ${sl} Darts`);
+        if (extra) hList.push(extra);
+
+        const combinedHighlights = hList.join(", ");
+
         const payload = {
             spieler: document.getElementById('spieler').value.trim(),
             avg: document.getElementById('avg').value,
             spiele: document.getElementById('spiele').value,
             gewonnen: document.getElementById('gewonnen').value,
             verloren: document.getElementById('verloren').value,
-            highlights: document.getElementById('highlights').value.trim()
+            highlights: combinedHighlights
         };
 
         try {
